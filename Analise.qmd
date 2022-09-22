@@ -8,6 +8,10 @@ editor: visual
 ```{r}
 library(tidyverse)
 library(rio)
+library(ggplot2)
+library(zoo)
+library(isodate)
+library(lubridate)
 
 
 #download dos dados capes
@@ -18,15 +22,22 @@ files_Capes<-c("https://dadosabertos.capes.gov.br/dataset/b7003093-4fab-4b88-b0f
 
 dadospos_rio<-import_list(files_Capes)#baixando dados em forma de lista com rio
 
-dadospos_rio<-data.frame(Reduce(rbind, dadospos_rio))#transforma a lista em data frame
+
 
 
 Regiao<-c("SUDESTE","SUL","NORDESTE")#filtro de região
+
+dadospos_rio<-data.frame(Reduce(rbind, dadospos_rio))#transforma a lista em data frame
 
 #filtrando os dados para obter uma tabela atendendo aos parametros da pesquisa
 posgrad_data_filter<-dadospos_rio %>% 
   filter(NM_GRANDE_AREA_CONHECIMENTO=='CIÊNCIAS SOCIAIS APLICADAS',grepl('MESTRADO', DS_GRAU_ACADEMICO_DISCENTE)) %>% 
   filter(grepl('SUDESTE|NORDESTE|SUL',NM_REGIAO))
+
+posgrad_data_filter<-posgrad_data_filter %>% 
+  ymd(posgrad_data_filter$AN_BASE, truncated = 2L) 
+
+export(posgrad_data_filter,"dadospos.xlsx")
 
 
 ```
