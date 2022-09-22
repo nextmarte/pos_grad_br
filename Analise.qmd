@@ -1,0 +1,32 @@
+---
+title: "posgrad_data"
+author: "Marcus"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(rio)
+
+
+#download dos dados capes
+
+files_Capes<-c("https://dadosabertos.capes.gov.br/dataset/b7003093-4fab-4b88-b0fa-b7d8df0bcb77/resource/3b4b4d57-7652-49fb-b6f6-d9110ff0e6c2/download/br-capes-colsucup-discentes-2017-2021-11-10.xlsx","https://dadosabertos.capes.gov.br/dataset/b7003093-4fab-4b88-b0fa-b7d8df0bcb77/resource/398fb7e8-f259-408a-beff-e2add4001e6f/download/br-capes-colsucup-discentes-2018-2021-11-10.xlsx","https://dadosabertos.capes.gov.br/dataset/b7003093-4fab-4b88-b0fa-b7d8df0bcb77/resource/2812b7d6-53cc-4808-9dc5-dd3f2ce2a29c/download/br-capes-colsucup-discentes-2019-2021-11-10.xlsx","https://dadosabertos.capes.gov.br/dataset/b7003093-4fab-4b88-b0fa-b7d8df0bcb77/resource/02ab8495-cb05-41dd-a8a1-d0d42aa1a497/download/br-capes-colsucup-discentes-2020-2021-11-10.xlsx")
+
+
+
+dadospos_rio<-import_list(files_Capes)#baixando dados em forma de lista com rio
+
+dadospos_rio<-data.frame(Reduce(rbind, dadospos_rio))#transforma a lista em data frame
+
+
+Regiao<-c("SUDESTE","SUL","NORDESTE")#filtro de região
+
+#filtrando os dados para obter uma tabela atendendo aos parametros da pesquisa
+posgrad_data_filter<-dadospos_rio %>% 
+  filter(NM_GRANDE_AREA_CONHECIMENTO=='CIÊNCIAS SOCIAIS APLICADAS',grepl('MESTRADO', DS_GRAU_ACADEMICO_DISCENTE)) %>% 
+  filter(grepl('SUDESTE|NORDESTE|SUL',NM_REGIAO))
+
+
+```
