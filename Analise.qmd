@@ -9,9 +9,9 @@ editor: visual
 library(tidyverse)
 library(rio)
 library(ggplot2)
-library(zoo)
-library(isodate)
+library(readxl)
 library(lubridate)
+library(esquisse)
 
 
 #download dos dados capes
@@ -25,19 +25,44 @@ dadospos_rio<-import_list(files_Capes)#baixando dados em forma de lista com rio
 
 
 
-Regiao<-c("SUDESTE","SUL","NORDESTE")#filtro de região
-
 dadospos_rio<-data.frame(Reduce(rbind, dadospos_rio))#transforma a lista em data frame
 
 #filtrando os dados para obter uma tabela atendendo aos parametros da pesquisa
 posgrad_data_filter<-dadospos_rio %>% 
-  filter(NM_GRANDE_AREA_CONHECIMENTO=='CIÊNCIAS SOCIAIS APLICADAS',grepl('MESTRADO', DS_GRAU_ACADEMICO_DISCENTE)) %>% 
-  filter(grepl('SUDESTE|NORDESTE|SUL',NM_REGIAO))
+  filter(grepl('CIÊNCIAS SOCIAIS',NM_GRANDE_AREA_CONHECIMENTO),grepl('MESTRADO', DS_GRAU_ACADEMICO_DISCENTE)) %>% 
+  filter(grepl('SUDESTE|NORDESTE|SUL',NM_REGIAO)) %>% 
+  filter(grepl('UFRJ|UFF|CEFET|UERJ|UFPE|UFRGS',SG_ENTIDADE_ENSINO))
+
+posgrad_data_filter<-posgrad_data_filter %>% 
+  mutate(ano=(gsub(" ", "",(paste(AN_BASE,"-",1,"-",1)))))
+
+
+posgrad_data_filter<-posgrad_data_filter %>% 
+  select(ano,SG_ENTIDADE_ENSINO,NM_MODALIDADE_PROGRAMA,AN_NASCIMENTO_DISCENTE,NM_SITUACAO_DISCENTE,
+         ST_INGRESSANTE,NM_MUNICIPIO_PROGRAMA_IES)
+
+posgrad_data_filter$NM_SITUACAO_DISCENTE<-as.factor(posgrad_data_filter$NM_SITUACAO_DISCENTE)
+posgrad_data_filter$ano<-as_date(posgrad_data_filter$ano)
+
+(ggplot(posgrad_data_filter) +
+  aes(x = ano, fill = NM_SITUACAO_DISCENTE) +
+  geom_histogram(alpha = 10,
+                 binwidth = 1) +
+theme_minimal())
+
+esquisse::esquisser(posgrad_data_filter)
+#export(posgrad_data_filter,"posgraddata.xlsx")
+
+
+
+  
 
 posgrad_data_filter<-posgrad_data_filter %>% 
   ymd(posgrad_data_filter$AN_BASE, truncated = 2L) 
 
 export(posgrad_data_filter,"dadospos.xlsx")
 
+#UFRJ, UFF, CEFET, UERJ, UFPE, UFRGS
+#ciencias sociais
 
 ```
